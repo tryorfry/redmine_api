@@ -1,0 +1,8 @@
+{
+    "redmine": {
+        "IP": "IPADDRESS",
+        "baseAPIEndpoint": "http://demo.redmine.org/redmine",
+        "APIKey": "key",
+        "userName": "user"
+    }
+}
