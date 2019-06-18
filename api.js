@@ -21,12 +21,57 @@ const HEADERS = {
 // status_id 4 = 'Feature'
 // status_id 5 = 'Closed'
 
+// create issue:
+//createIssueFromCSV('database_optimize_tasks.csv')
+function createIssueFromCSV (csvFilePath) {
+    const csv = require('csv-parser');
+    const fs = require('fs');
+
+    fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on('data', (row) => {
+            console.log(row);
+            createTask(row);
+        })
+        .on('end', () => {
+            console.log('hello');
+        });
+}
+
+function createTask(row) {
+    let createJSON = {
+        issue: row
+    };
+
+    request({
+            url: `${BASEURL}/issues.json`,
+            headers: HEADERS,
+            method: 'post',
+            json: createJSON
+        },
+        (err, res, body) => {
+            if (err) {
+                console.log(err)
+            };
+            //console.log(JSON.stringify(res));
+            if (res.statusCode === 200 || res.statusCode === 201) {
+                console.log(body);
+                console.log("created " + res + " successfully");
+            } else {
+                console.log("Failed to create " + row + " Error: " + res.statusCode + ":" + res.headers.status);
+            }
+        }
+    );
+}
+
+
 // sprint parent taskids 991,989,979,978,965,964,945,944,911,910,891,890,853,852,810,809,757,741,739,738,719,681,663,656
-[991,989].forEach(
+/* [741, 809, 810, 890, 891, 910, 911, 964, 965, 989, 991, 1014, 1015, 1025, 1026, 1050, 1051].forEach(
 //close all the sprint parent tasks    
     (issueID, i) => {
         update_issues(
-            `${BASEURL}/issues.json?issue_id=${issueID}`,
+            //`${BASEURL}/issues.json?parent_id=${issueID}&status_id=3`,
+            `${BASEURL}/issues.json?issue_id=${issueID}`,            
             {
                 "issue": {
                     "status_id": 5
@@ -35,7 +80,7 @@ const HEADERS = {
         );
     }
 );
-
+ */
 /*
 update_issues:
     Finds the issue and update the issues one by one.
@@ -47,7 +92,7 @@ async function update_issues(issuesUrl, updateJSON) {
     let issues = await get_issues(issuesUrl);
     issues.forEach((issue, i) => {
         console.log("Updating " + issue.id + '...');
-        //            console.log(i, '--->', issue);
+                console.log(i, '--->', issue);
         request({
                 url: `${BASEURL}/issues/${issue.id}.json`,
                 headers: HEADERS,
